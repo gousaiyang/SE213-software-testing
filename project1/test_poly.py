@@ -1,6 +1,7 @@
 import re
 import sys
 import socket
+import random
 
 assert sys.version_info[0] >= 3
 
@@ -83,10 +84,42 @@ def run_test():
     print('%d out of %d test cases passed.' % (num_passed, num_total))
     print('Pass rate: %.2f%%' % (num_passed / num_total * 100))
 
+def thousand():
+    str="1"+"0"*1000
+    return str
+
+def one_thousand():
+    str="0."+"0"*999+"1"
+    return str
+
+def high_power():
+    l=["0"]*65535
+    l=["1"]+l+["1"]
+    return l
+
+
 def set_up_test_cases():
-    # TODO: add more test cases
-    add_test_case([1, 1], True, 'x+1')
+    # TODO: add even more test cases
+    add_test_case([1, 1], True, 'x+1')  # omit first plus sign, omit x^0
     add_test_case('x', False, 'Invalid coefficient list. Space delimited real numbers expected.')
+    cnt = 1  # cnt of random input
+    for n in range(cnt):
+        pos = random.randint(2, 10000)
+        neg = -1 * random.randint(2, 10000)
+        add_test_case([pos, neg], True, str(pos) +'x'+ str(neg))  # regular case with negative number
+        add_test_case([neg, pos], True, str(neg) + 'x+' + str(pos))  # display first neg sign
+    add_test_case([1, 0, 0], True, 'x^2')  # omit coefficient @1; omit subexp @0
+    add_test_case([0, -1, 1], True, '-x+1')  # omit coefficient @-1; mask trailing 0s
+    add_test_case([2147483647, -2147483648], True, '2147483647x-2147483648')  # large input exceeding integer bounds
+    add_test_case(["0001", "-0001"], True, 'x-1')  # non standard form of integers
+    add_test_case(high_power(),True,"x^65536+1") # excessively long testcase whose expected output is x^65536
+    add_test_case([0.1, -0.01], True, '0.1x-0.01')  # float number support
+    add_test_case([".100","-1.230"],True,'0.1x-1.23')   #non conforming floats
+    add_test_case(["0xa", "0xB"], True, '10x+11')  # hex number support, upper and lower cases
+    add_test_case(["1e4", "1e-3", "3.14e2", "-3.14e-3"], True,
+                  '10000x^3+0.001x^2+314x-0.00314')  # scientific notation and necessary conversion to integer
+    add_test_case(["1e1000","0"],True,thousand()+"x")   #real large input
+    add_test_case(["1e-1000","0"],True,one_thousand()+"x")  #real small input
 
 def main():
     set_up_test_cases()
