@@ -152,14 +152,17 @@ def set_up_test_cases():
     add_test_case([-1, 0], True,
                   '-x')  # -1 should be omitted (not expect: -1x); trailing 0 should be omitted (not expect: -x+0)
     add_test_case([1, 0, 0], True, 'x^2')  # omit coefficient @1; omit subexp @0
+    add_test_case([1, -1, 234, 0, -33, 0, 0], True, 'x^6-x^5+234x^4-33x^2')
 
     ###############
     # Condition 8 #
     ###############
+    add_test_case([1345, 0, -33, 0, 0], True, '1345x^4-33x^2')
 
     ###############
     # Condition 9 #
     ###############
+    add_test_case([-1345, 0, -33, 0, 0], True, '-1345x^4-33x^2')
 
     ################
     # Condition 10 #
@@ -169,6 +172,7 @@ def set_up_test_cases():
     ################
     # Condition 11 #
     ################
+    add_test_case([0, 0, 0, 0, -1], True, '-1')
 
     ################
     # Condition 12 #
@@ -177,22 +181,32 @@ def set_up_test_cases():
     add_test_case([-1, -1], True, '-x-1')  # first -1 should be omitted, second should not
     add_test_case([1, 1], True, 'x+1')  # omit first plus sign, omit x^0
     add_test_case([0, -1, 1], True, '-x+1')  # omit coefficient @-1; mask trailing 0s
+    add_test_case([1, -1, 234, 0, -33, 0, -1], True, 'x^6-x^5+234x^4-33x^2-1')
+    add_test_case([1, -1, 234, 0, -33, 0, 1], True, 'x^6-x^5+234x^4-33x^2+1')
 
     ################
     # Condition 13 #
     ################
+    add_test_case([1345, 0, -33, 0, 1], True, '1345x^4-33x^2+1')
+    add_test_case([1345, 0, -33, 0, -1], True, '1345x^4-33x^2-1')
 
     ################
     # Condition 14 #
     ################
+    add_test_case([-1345, 0, -33, 0, 1], True, '-1345x^4-33x^2+1')
+    add_test_case([-1345, 0, -33, 0, -1], True, '-1345x^4-33x^2-1')
 
     ################
     # Condition 15 #
     ################
+    add_test_case([0, 0, 0, 0, 1234], True, '1234')
+    add_test_case([0, 0, 0, 0, -1234], True, '-1234')
 
     ################
     # Condition 16 #
     ################
+    add_test_case([1, -1, 234, 0, -33, 0, -1234], True, 'x^6-x^5+234x^4-33x^2-1234')
+    add_test_case([1, -1, 234, 0, -33, 0, 1234], True, 'x^6-x^5+234x^4-33x^2+1234')
 
     ################
     # Condition 17 #
