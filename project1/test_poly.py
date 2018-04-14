@@ -72,6 +72,7 @@ def run_test():
 
         judge_result = test_case['judge_func'](result, test_case['expected_output'])
         if judge_result:
+            # print('Passed, with input: %r' % test_case['input'])
             print('Passed')
             num_passed += 1
         else:
@@ -100,6 +101,53 @@ def high_power():
 
 def set_up_test_cases():
     # TODO: add even more test cases
+
+    ####### number of coefficients X coefficient range #######
+    # 0 coefficient
+    add_test_case([], True, '')
+
+    # 1 coefficient
+    add_test_case([1000], True, '1000')   # normal value
+    add_test_case([-1000], True, '-1000') # normal value
+    add_test_case([0], True, '0')         # 0 cannot be omitted
+    add_test_case([1], True, '1')         # 1 cannot be omitted
+    add_test_case([-1], True, '-1')       # -1 cannot be omitted
+    add_test_case([2147483645], True, '2147483645')   # lower than int limit
+    add_test_case([2147483646], True, '2147483646')   # equal to int limit
+    add_test_case([2147483647], True, '2147483647')   # higher than int limit
+    add_test_case([-2147483646], True, '-2147483646') # lower than int limit
+    add_test_case([-2147483647], True, '-2147483647') # equal to int limit
+    add_test_case([-2147483648], True, '-2147483648') # higher than int limit
+
+    # 2 coefficients
+    add_test_case([1000, -1000], True, '1000x-1000')    # normal value
+    add_test_case([-1000, 1000], True, '-1000x+1000')   # normal value
+    add_test_case([0, 0], True, '0')        # leading 0 coefficient should be omitted
+    add_test_case([0, 1], True, '1')        # leading 0 coefficient should be omitted
+    add_test_case([1, 0], True, 'x')        # 1 should be omitted (not expect: 1x); trailing 0 should be omitted (not expect: x+0)
+    add_test_case([1, 1], True, 'x+1')      # first 1 should be omitted, second should not
+    add_test_case([-1, 0], True, '-x')      # -1 should be omitted (not expect: -1x); trailing 0 should be omitted (not expect: -x+0)
+    add_test_case([-1, -1], True, '-x-1')   # first -1 should be omitted, second should not
+    add_test_case([2147483645, -2147483646], True, '2147483645x-2147483646')    # lower than int limit
+    add_test_case([2147483646, -2147483647], True, '2147483646x-2147483647')    # equal to int limit
+    add_test_case([2147483647, -2147483648], True, '2147483647x-2147483648')    # higher than int limit
+
+    # 65533 coefficients (cannot test to 2147483646 due to py list length limit)
+    add_test_case([1000, -1000]+[0]*65531, True, '1000x^65532-1000x^65531')
+    add_test_case([-1000, 1000]+[0]*65531, True, '-1000x^65532+1000x^65531')
+    add_test_case([0]*65533, True, '0')
+    add_test_case([0]*65532+[1], True, '1')
+    add_test_case([1]+[0]*65532, True, 'x^65532')
+    add_test_case([1]+[0]*65531+[1], True, 'x^65532+1')
+    add_test_case([-1]+[0]*65532, True, '-x^65532')
+    add_test_case([-1]+[0]*65531+[-1], True, '-x^65532-1')
+
+    # 65534 coefficients
+
+
+    # 65535 coefficients
+
+
     add_test_case([1, 1], True, 'x+1')  # omit first plus sign, omit x^0
     add_test_case('x', False, 'Invalid coefficient list. Space delimited real numbers expected.')
     cnt = 1  # cnt of random input
