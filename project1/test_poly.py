@@ -5,17 +5,21 @@ import random
 
 assert sys.version_info[0] >= 3
 
+
 def file_content(filename, encoding='utf-8'):
     with open(filename, 'rb') as fin:
         content = fin.read()
     return content.decode(encoding)
+
 
 def get_server_config():
     t = file_content('server.txt').strip().split(' ')
     assert len(t) == 2
     return (t[0], int(t[1]))
 
+
 target = get_server_config()
+
 
 def test_raw(data):
     assert isinstance(data, (str, bytes))
@@ -40,13 +44,17 @@ def test_raw(data):
         'poly': res[0] if res else ''
     }
 
+
 def judge_response(result, expected):
     return expected in result['response']
+
 
 def judge_poly(result, expected):
     return result['poly'] == expected
 
+
 test_cases = []
+
 
 def add_test_case(input_, is_valid, expected_output):
     assert isinstance(input_, (str, list))
@@ -59,6 +67,7 @@ def add_test_case(input_, is_valid, expected_output):
         'expected_output': expected_output,
         'judge_func': judge_poly if is_valid else judge_response
     })
+
 
 def run_test():
     num_total = len(test_cases)
@@ -85,12 +94,14 @@ def run_test():
     print('%d out of %d test cases passed.' % (num_passed, num_total))
     print('Pass rate: %.2f%%' % (num_passed / num_total * 100))
 
+
 def thousand():
-    str="1"+"0"*1000
+    str = "1" + "0" * 1000
     return str
 
+
 def one_thousand():
-    str="0."+"0"*999+"1"
+    str = "0." + "0" * 999 + "1"
     return str
 
 
@@ -175,6 +186,7 @@ def set_up_test_cases():
 def main():
     set_up_test_cases()
     run_test()
+
 
 if __name__ == '__main__':
     main()
