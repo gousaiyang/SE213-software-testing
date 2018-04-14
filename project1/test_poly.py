@@ -235,7 +235,6 @@ def set_up_test_cases():
     add_test_case([-2147483648], True, '-2147483648')  # higher than int limit
     # TODO: small and large float
 
-
     # 2 coefficients
     add_test_case([2147483645, -2147483646], True, '2147483645x-2147483646')  # lower than int limit
     add_test_case([2147483646, -2147483647], True, '2147483646x-2147483647')  # equal to int limit
@@ -252,21 +251,20 @@ def set_up_test_cases():
     add_test_case([-1] + [0] * 65531 + [-1], True, '-x^65532-1')
 
     # 65537 coefficients
-    # cannot test to limit 2147483646 due to py list length limit, instead, choose a relatively large number
-    add_test_case([1000, -1000]+[0]*65535, True, '1000x^65536-1000x^65535')
-    add_test_case([-1000, 1000]+[0]*65535, True, '-1000x^65536+1000x^65535')
-    add_test_case([0]*65537,            True, '0')
-    add_test_case([0]*65536+[1],        True, '1')
-    add_test_case([1]+[0]*65536,        True, 'x^65536')
-    add_test_case([1]+[0]*65535+[1],    True, 'x^65536+1')
-    add_test_case([-1]+[0]*65536,       True, '-x^65536')
-    add_test_case([-1]+[0]*65535+[-1],  True, '-x^65536-1')
-    add_test_case([2147483645]+[0]*65535+[-2147483646], True, '2147483645x^65536-2147483646')
-    add_test_case([2147483646]+[0]*65535+[-2147483647], True, '2147483646x^65536-2147483647')
-    add_test_case([2147483647]+[0]*65535+[-2147483648], True, '2147483647x^65536-2147483648')
+    # Cannot test to limit 2147483646 due to py list length limit, instead, choose a relatively large number
+    add_test_case([-1000, 1000] + [0] * 65535, True, '-1000x^65536+1000x^65535')
+    add_test_case([0] * 65537, True, '0')
+    add_test_case([0] * 65536 + [1], True, '1')
+    add_test_case([1] + [0] * 65536, True, 'x^65536')
+    add_test_case([1] + [0] * 65535 + [1], True, 'x^65536+1')
+    add_test_case([-1] + [0] * 65536, True, '-x^65536')
+    add_test_case([-1] + [0] * 65535 + [-1], True, '-x^65536-1')
+    add_test_case([2147483645] + [0] * 65535 + [-2147483646], True, '2147483645x^65536-2147483646')
+    add_test_case([2147483646] + [0] * 65535 + [-2147483647], True, '2147483646x^65536-2147483647')
+    add_test_case([2147483647] + [0] * 65535 + [-2147483648], True, '2147483647x^65536-2147483648')
     # TODO: small and large float
-    add_test_case(high_power(), True, "x^65536+1")  # excessively long testcase whose expected output is x^65536
 
+    # Large floats
     add_test_case(["1e1000", "0"], True, thousand() + "x")  # real large input
     add_test_case(["1e-1000", "0"], True, one_thousand() + "x")  # real small input
 
@@ -279,20 +277,6 @@ def set_up_test_cases():
         neg = -1 * random.randint(2, 10000)
         add_test_case([pos, neg], True, str(pos) + 'x' + str(neg))  # regular case with negative number
         add_test_case([neg, pos], True, str(neg) + 'x+' + str(pos))  # display first neg sign
-
-    ####### invalid input #######
-    add_test_case('x', False, 'Invalid coefficient list. Space delimited real numbers expected.')
-
-    ####### input format #######
-    add_test_case(["0001", "-0001"], True, 'x-1')  # non standard form of integers
-    add_test_case([".100","-1.230"],True,'0.1x-1.23')   #non conforming floats
-    add_test_case(["0xa", "0xB"], True, '10x+11')  # hex number support, upper and lower cases
-    add_test_case(["1e4", "1e-3", "3.14e2", "-3.14e-3"], True,
-                  '10000x^3+0.001x^2+314x-0.00314')  # scientific notation and necessary conversion to integer
-
-    add_test_case([0.1, -0.01], True, '0.1x-0.01')  # float number support
-    add_test_case(["1e1000", "0"], True, thousand() + "x")  # real large input
-    add_test_case(["1e-1000", "0"], True, one_thousand() + "x")  # real small input
 
 
 def main():
