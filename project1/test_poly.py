@@ -229,13 +229,13 @@ def set_up_test_cases():
     add_test_case([0.1, -0.01], True, '0.1x-0.01')  # float number support
     add_test_case(["1e4", "1e-3", "3.14e2", "-3.14e-3"], True,
                   '10000x^3+0.001x^2+314x-0.00314')  # scientific notation and necessary conversion to integer
+    add_test_case([".100", "-1.230"], True, '0.1x-1.23')  # non conforming floats
 
     ###############
     # False input #
     ###############
     add_test_case('x', False, 'Invalid coefficient list. Space delimited real numbers expected.')
     add_test_case(["0001", "-0001"], True, 'x-1')  # non standard form of integers
-    add_test_case([".100", "-1.230"], True, '0.1x-1.23')  # non conforming floats
 
     #################
     # Boundary test #
