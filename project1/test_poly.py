@@ -260,22 +260,22 @@ def set_up_test_cases():
     #############################
     # float input boundary test #
     #############################
-    add_test_case(["3.3e+38", "-3.3e+38"], True, '33'+'0'*37+'x-33'+'0'*37)  # lower
-    add_test_case(["3.4e+38", "-3.4e+38"], True, '34'+'0'*37+'x-34'+'0'*37)  # around
-    add_test_case(["3.5e+38", "-3.5e+38"], True, '35'+'0'*37+'x-35'+'0'*37)  # higher
-    add_test_case(["1.18e-38"], True, '0.'+'0'*37+'116')  # larger than min pos
-    add_test_case(["1.17e-38"], True, '0.'+'0'*37+'116')  # around min pos
+    add_test_case(["3.3e+38", "-3.3e+38"], True, ['33'+'0'*37+'x-33'+'0'*37, '3.3e+38x-3.3e+38'])  # lower
+    add_test_case(["3.4e+38", "-3.4e+38"], True, ['34'+'0'*37+'x-34'+'0'*37, '3.4e+38x-3.4e+38'])  # around
+    add_test_case(["3.5e+38", "-3.5e+38"], True, ['35'+'0'*37+'x-35'+'0'*37, '3.5e+38x-3.5e+38'])  # higher
+    add_test_case(["1.18e-38"], True, ['0.'+'0'*37+'116', '1.18e-38'])  # larger than min pos
+    add_test_case(["1.17e-38"], True, ['0.'+'0'*37+'116', '1.17e-38'])  # around min pos
     add_test_case(["1.16e-38"], True, ['0.'+'0'*37+'116', '1.16e-38'])  # smaller than min pos
 
     ##############################
     # double input boundary test #
     ##############################
-    add_test_case(["-1.6e+308", "1.6e+308"], True, '-16'+'0'*307+'x+16'+'0'*307)  # lower
-    add_test_case(["-1.7e+308", "1.7e+308"], True, '-17'+'0'*307+'x+17'+'0'*307)  # around
-    add_test_case(["-1.8e+308", "1.8e+308"], True, '-18'+'0'*307+'x+18'+'0'*307)  # higher
-    add_test_case(["2.23e-308"], True, '0.'+'0'*307+'223')  # larger than min pos
-    add_test_case(["2.22e-308"], True, '0.'+'0'*307+'222')  # around min pos
-    add_test_case(["2.21e-308"], True, '0.'+'0'*307+'221')  # smaller than min pos
+    add_test_case(["-1.6e+308", "1.6e+308"], True, ['-16'+'0'*307+'x+16'+'0'*307, '-1.6e+308x+1.6e+308'])  # lower
+    add_test_case(["-1.7e+308", "1.7e+308"], True, ['-17'+'0'*307+'x+17'+'0'*307, '-1.7e+308x+1.7e+308'])  # around
+    add_test_case(["-1.8e+308", "1.8e+308"], True, ['-18'+'0'*307+'x+18'+'0'*307, '-1.8e+308x+1.8e+308'])  # higher
+    add_test_case(["2.23e-308"], True, ['0.'+'0'*307+'223', '2.23e-308'])  # larger than min pos
+    add_test_case(["2.22e-308"], True, ['0.'+'0'*307+'222', '2.22e-308'])  # around min pos
+    add_test_case(["2.21e-308"], True, ['0.'+'0'*307+'221', '2.21e-308'])  # smaller than min pos
     add_test_case(["1e-1000", "0"], True, [one_thousand() + "x", '1e-1000x'])  # real small input
 
     ####################################
