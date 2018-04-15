@@ -46,11 +46,17 @@ def test_raw(data):
 
 
 def judge_response(result, expected):
-    return expected in result['response']
+    if isinstance(expected, list):
+        return any(e in result['response'] for e in expected)
+    else:
+        return expected in result['response']
 
 
 def judge_poly(result, expected):
-    return result['poly'] == expected
+    if isinstance(expected, list):
+        return result['poly'] in expected
+    else:
+        return result['poly'] == expected
 
 
 test_cases = []
@@ -259,8 +265,7 @@ def set_up_test_cases():
     add_test_case(["3.5e+38", "-3.5e+38"], True, '35'+'0'*37+'x-35'+'0'*37)  # higher
     add_test_case(["1.18e-38"], True, '0.'+'0'*37+'116')  # larger than min pos
     add_test_case(["1.17e-38"], True, '0.'+'0'*37+'116')  # around min pos
-    add_test_case(["1.16e-38"], True, '0.'+'0'*37+'116')  # smaller than min pos
-    # TODO: format like '1.18e-38x' is acceptable
+    add_test_case(["1.16e-38"], True, ['0.'+'0'*37+'116', '1.16e-38'])  # smaller than min pos
 
     ##############################
     # double input boundary test #
@@ -271,8 +276,7 @@ def set_up_test_cases():
     add_test_case(["2.23e-308"], True, '0.'+'0'*307+'223')  # larger than min pos
     add_test_case(["2.22e-308"], True, '0.'+'0'*307+'222')  # around min pos
     add_test_case(["2.21e-308"], True, '0.'+'0'*307+'221')  # smaller than min pos
-    add_test_case(["1e-1000", "0"], True, one_thousand() + "x")  # real small input
-    # TODO: format like '1.18e-38x' is acceptable
+    add_test_case(["1e-1000", "0"], True, [one_thousand() + "x", '1e-1000x'])  # real small input
 
     ####################################
     # Large number of coefficient test #
