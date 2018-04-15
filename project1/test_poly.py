@@ -141,18 +141,16 @@ def set_up_test_cases():
     ###############
     # Condition 6 #
     ###############
-    add_test_case([0, 0], True, '0')  # leading 0 coefficient should be omitted
+    add_test_case([0, 0], True, '0')
     add_test_case([0] * 1000, True, '0')
 
     ###############
     # Condition 7 #
     ###############
-    add_test_case([1, 0], True,
-                  'x')  # 1 should be omitted (not expect: 1x); trailing 0 should be omitted (not expect: x+0)
-    add_test_case([-1, 0], True,
-                  '-x')  # -1 should be omitted (not expect: -1x); trailing 0 should be omitted (not expect: -x+0)
-    add_test_case([1, 0, 0], True, 'x^2')  # omit coefficient @1; omit subexp @0
-    add_test_case([1, -1, 234, 0, -33, 0, 0], True, 'x^6-x^5+234x^4-33x^2')
+    add_test_case([1, 0], True, 'x')
+    add_test_case([-1, 0], True, '-x')
+    add_test_case([1, 0, 0], True, 'x^2')
+    add_test_case([-0.1, 100.9, 1, -1, 234, 0, -33, 0, 0], True, '-0.1x^8+100.9x^7+x^6-x^5+234x^4-33x^2')
 
     ###############
     # Condition 8 #
@@ -167,7 +165,7 @@ def set_up_test_cases():
     ################
     # Condition 10 #
     ################
-    add_test_case([0, 1], True, '1')  # leading 0 coefficient should be omitted
+    add_test_case([0, 1], True, '1')
 
     ################
     # Condition 11 #
@@ -177,12 +175,12 @@ def set_up_test_cases():
     ################
     # Condition 12 #
     ################
-    add_test_case([1, 1], True, 'x+1')  # first 1 should be omitted, second should not
-    add_test_case([-1, -1], True, '-x-1')  # first -1 should be omitted, second should not
-    add_test_case([1, 1], True, 'x+1')  # omit first plus sign, omit x^0
-    add_test_case([0, -1, 1], True, '-x+1')  # omit coefficient @-1; mask trailing 0s
-    add_test_case([1, -1, 234, 0, -33, 0, -1], True, 'x^6-x^5+234x^4-33x^2-1')
-    add_test_case([1, -1, 234, 0, -33, 0, 1], True, 'x^6-x^5+234x^4-33x^2+1')
+    add_test_case([1, 1], True, 'x+1')
+    add_test_case([-1, -1], True, '-x-1')
+    add_test_case([1, 1], True, 'x+1')
+    add_test_case([0, -1, 1], True, '-x+1')
+    add_test_case([1111.1, -0.02, 1, -1, 234, 0, -33, 0, -1], True, '1111.1x^8-0.02x^7+x^6-x^5+234x^4-33x^2-1')
+    add_test_case([1111.1, -0.02, 1, -1, 234, 0, -33, 0, 1], True, '1111.1x^8-0.02x^7+x^6-x^5+234x^4-33x^2+1')
 
     ################
     # Condition 13 #
@@ -205,82 +203,81 @@ def set_up_test_cases():
     ################
     # Condition 16 #
     ################
-    add_test_case([1, -1, 234, 0, -33, 0, -1234], True, 'x^6-x^5+234x^4-33x^2-1234')
-    add_test_case([1, -1, 234, 0, -33, 0, 1234], True, 'x^6-x^5+234x^4-33x^2+1234')
+    add_test_case([1111.1, -0.02, 1, -1, 234, 0, -33, 0, -1234], True, '1111.1x^8-0.02x^7+x^6-x^5+234x^4-33x^2-1234')
+    add_test_case([1111.1, -0.02, 1, -1, 234, 0, -33, 0, 1234], True, '1111.1x^8-0.02x^7+x^6-x^5+234x^4-33x^2+1234')
 
     ################
     # Condition 17 #
     ################
-    add_test_case([1000, -1000], True, '1000x-1000')  # normal value
+    add_test_case([1000, -1000], True, '1000x-1000')
 
     ################
     # Condition 18 #
     ################
-    add_test_case([-1000, 1000], True, '-1000x+1000')  # normal value
+    add_test_case([-1000, 1000], True, '-1000x+1000')
 
-    #############
-    # Hex input #
-    #############
-    add_test_case(["0xa", "0xB"], True, '10x+11')  # hex number support, upper and lower cases
+    ############################
+    # Unconventional int input #
+    ############################
+    add_test_case(['0xa', '0xB'], True, '10x+11')
+    add_test_case(['0001', '-0001'], True, 'x-1')
+    add_test_case(['   1   ', '  1   '], True, 'x+1')  # whitespace
 
     ###############
     # Float input #
     ###############
-    add_test_case([0.1, -0.01], True, '0.1x-0.01')  # float number support
+    add_test_case([0.1, -0.01], True, '0.1x-0.01')
     add_test_case(["1e4", "1e-3", "3.14e2", "-3.14e-3"], True,
                   '10000x^3+0.001x^2+314x-0.00314')  # scientific notation and necessary conversion to integer
     add_test_case([".100", "-1.230"], True, '0.1x-1.23')  # non conforming floats
 
     ###############
-    # False input #
+    # Invalid input #
     ###############
     add_test_case('x', False, 'Invalid coefficient list. Space delimited real numbers expected.')
-    add_test_case(["0001", "-0001"], True, 'x-1')  # non standard form of integers
 
-    #################
-    # Boundary test #
-    #################
-    # 1 coefficients
-    add_test_case([2147483645], True, '2147483645')  # lower than int limit
-    add_test_case([2147483646], True, '2147483646')  # equal to int limit
-    add_test_case([2147483647], True, '2147483647')  # higher than int limit
-    add_test_case([-2147483646], True, '-2147483646')  # lower than int limit
-    add_test_case([-2147483647], True, '-2147483647')  # equal to int limit
-    add_test_case([-2147483648], True, '-2147483648')  # higher than int limit
-    # TODO: small and large float
+    #############################
+    # int32 input boundary test #
+    #############################
+    add_test_case(["2147483645", "-2147483646"], True, '2147483645x-2147483646')  # lower
+    add_test_case(["2147483646", "-2147483647"], True, '2147483646x-2147483647')  # equal to
+    add_test_case(["2147483647", "-2147483648"], True, '2147483647x-2147483648')  # higher
 
-    # 2 coefficients
-    add_test_case([2147483645, -2147483646], True, '2147483645x-2147483646')  # lower than int limit
-    add_test_case([2147483646, -2147483647], True, '2147483646x-2147483647')  # equal to int limit
-    add_test_case([2147483647, -2147483648], True, '2147483647x-2147483648')  # higher than int limit
-    # TODO: small and large float
-
-    # 65533 coefficients (cannot test to 2147483646 due to py list length limit)
-    add_test_case([1000, -1000] + [0] * 65531, True, '1000x^65532-1000x^65531')
-    add_test_case([-1000, 1000] + [0] * 65531, True, '-1000x^65532+1000x^65531')
-    add_test_case([0] * 65532 + [1], True, '1')
-    add_test_case([1] + [0] * 65532, True, 'x^65532')
-    add_test_case([1] + [0] * 65531 + [1], True, 'x^65532+1')
-    add_test_case([-1] + [0] * 65532, True, '-x^65532')
-    add_test_case([-1] + [0] * 65531 + [-1], True, '-x^65532-1')
-
-    # 65537 coefficients
-    # Cannot test to limit 2147483646 due to py list length limit, instead, choose a relatively large number
-    add_test_case([-1000, 1000] + [0] * 65535, True, '-1000x^65536+1000x^65535')
-    add_test_case([0] * 65537, True, '0')
-    add_test_case([0] * 65536 + [1], True, '1')
-    add_test_case([1] + [0] * 65536, True, 'x^65536')
-    add_test_case([1] + [0] * 65535 + [1], True, 'x^65536+1')
-    add_test_case([-1] + [0] * 65536, True, '-x^65536')
-    add_test_case([-1] + [0] * 65535 + [-1], True, '-x^65536-1')
-    add_test_case([2147483645] + [0] * 65535 + [-2147483646], True, '2147483645x^65536-2147483646')
-    add_test_case([2147483646] + [0] * 65535 + [-2147483647], True, '2147483646x^65536-2147483647')
-    add_test_case([2147483647] + [0] * 65535 + [-2147483648], True, '2147483647x^65536-2147483648')
-    # TODO: small and large float
-
-    # Large floats
+    #############################
+    # int64 input boundary test #
+    #############################
+    add_test_case(["-9223372036854775806", "9223372036854775805"], True, '-9223372036854775806x+9223372036854775805')  # lower
+    add_test_case(["-9223372036854775807", "9223372036854775806"], True, '-9223372036854775807x+9223372036854775806')  # equal to
+    add_test_case(["-9223372036854775808", "9223372036854775807"], True, '-9223372036854775808x+9223372036854775807')  # higher
     add_test_case(["1e1000", "0"], True, thousand() + "x")  # real large input
+
+    #############################
+    # float input boundary test #
+    #############################
+    add_test_case(["3.3e+38", "-3.3e+38"], True, '33'+'0'*37+'x-33'+'0'*37)  # lower
+    add_test_case(["3.4e+38", "-3.4e+38"], True, '34'+'0'*37+'x-34'+'0'*37)  # around
+    add_test_case(["3.5e+38", "-3.5e+38"], True, '35'+'0'*37+'x-35'+'0'*37)  # higher
+    add_test_case(["1.18e-38"], True, '0.'+'0'*37+'116')  # larger than min pos
+    add_test_case(["1.17e-38"], True, '0.'+'0'*37+'116')  # around min pos
+    add_test_case(["1.16e-38"], True, '0.'+'0'*37+'116')  # smaller than min pos
+    # TODO: format like '1.18e-38x' is acceptable
+
+    ##############################
+    # double input boundary test #
+    ##############################
+    add_test_case(["-1.6e+308", "1.6e+308"], True, '-16'+'0'*307+'x+16'+'0'*307)  # lower
+    add_test_case(["-1.7e+308", "1.7e+308"], True, '-17'+'0'*307+'x+17'+'0'*307)  # around
+    add_test_case(["-1.8e+308", "1.8e+308"], True, '-18'+'0'*307+'x+18'+'0'*307)  # higher
+    add_test_case(["2.23e-308"], True, '0.'+'0'*307+'223')  # larger than min pos
+    add_test_case(["2.22e-308"], True, '0.'+'0'*307+'222')  # around min pos
+    add_test_case(["2.21e-308"], True, '0.'+'0'*307+'221')  # smaller than min pos
     add_test_case(["1e-1000", "0"], True, one_thousand() + "x")  # real small input
+    # TODO: format like '1.18e-38x' is acceptable
+
+    ####################################
+    # Large number of coefficient test #
+    ####################################
+    add_test_case([1]+[0]*1000000+[1], True, 'x^1000001+1')
 
     ###############
     # Random test #
