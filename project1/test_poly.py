@@ -237,9 +237,9 @@ def set_up_test_cases():
                   '10000x^3+0.001x^2+314x-0.00314')  # scientific notation and necessary conversion to integer
     add_test_case([".100", "-1.230"], True, '0.1x-1.23')  # non conforming floats
 
-    ###############
+    #################
     # Invalid input #
-    ###############
+    #################
     add_test_case('x', False, 'Invalid coefficient list. Space delimited real numbers expected.')
 
     #############################
