@@ -13,6 +13,7 @@ class BFMachine:
 
         self.reset_mem()
         self._cycles = 0
+        self._pc = 0
 
     def load_code(self, code):
         if not isinstance(code, (str, bytes)):
@@ -194,6 +195,14 @@ class BFMachine:
     @property
     def memory(self):
         return bytes(self._mem)
+
+    @property
+    def memory_pointer(self):
+        return self._mem_ptr
+
+    @property
+    def pc(self):
+        return self._pc
 
     @staticmethod
     def quine_test(code):
