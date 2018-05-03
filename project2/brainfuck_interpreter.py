@@ -218,3 +218,11 @@ class BFMachine:
         return BFMachine(code).run() == code
 
 __all__ = ['BFMachine']
+
+
+#if __name__ == '__main__':
+#    m=BFMachine(b'#\n.')
+#    m.run()
+#    print(m.memory)
+#    print(m.memory_pointer)
+#    print(m.pc)
