@@ -7,6 +7,9 @@ class TestBFMachine(unittest.TestCase):
     code_quine = b'->+>+++>>+>++>+>+++>>+>++>>>+>+>+>++>+>>>>+++>+>>++>+>+++>>++>++>>+>>+>++>++>+>>>>+++>+>>>>++>++>>>>+>>++>+>+++>>>++>>++++++>>+>>++>+>>>>+++>>+++++>>+>+++>>>++>>++>>+>>++>+>+++>>>++>>+++++++++++++>>+>>++>+>+++>+>+++>>>++>>++++>>+>>++>+>>>>+++>>+++++>>>>++>>>>+>+>++>>+++>+>>>>+++>+>>>>+++>+>>>>+++>>++>++>+>+++>+>++>++>>>>>>++>+>+++>>>>>+++>>>++>+>+++>+>+>++>>>>>>++>>>+>>>++>+>>>>+++>+>>>+>>++>+>++++++++++++++++++>>>>+>+>>>+>>++>+>+++>>>++>>++++++++>>+>>++>+>>>>+++>>++++++>>>+>++>>+++>+>+>++>+>+++>>>>>+++>>>+>+>>++>+>+++>>>++>>++++++++>>+>>++>+>>>>+++>>++++>>+>+++>>>>>>++>+>+++>>+>++>>>>+>+>++>+>>>>+++>>+++>>>+[[->>+<<]<+]+++++[->+++++++++<]>.[+]>>[<<+++++++[->+++++++++<]>-.------------------->-[-<.<+>>]<[+]<+>>>]<<<[-[-[-[>>+<++++++[->+++++<]]>++++++++++++++<]>+++<]++++++[->+++++++<]>+<<<-[->>>++<<<]>[->>.<<]<<]'
     code_no_loop = b'++++++++>->-->--->----<<'
     code_loop = b'+++[-]'
+    code_index_error = b'<.'
+    code_whitespace = b'   .'   #note that I add a dot to stop interpreter from complaining
+    code_comment=b'# \n'
 
     def test_init(self):
         m = BFMachine()
@@ -52,7 +55,6 @@ class TestBFMachine(unittest.TestCase):
         with self.assertRaises(ValueError):
             BFMachine.quine_test('')
 
-
         self.assertFalse(BFMachine.quine_test(self.code_hello))
         self.assertTrue(BFMachine.quine_test(self.code_quine))
 
@@ -96,7 +98,27 @@ class TestBFMachine(unittest.TestCase):
         m.run()
         self.assertEqual(m.pc, len(self.code_loop))
 
+    def test_index_error(self):
+        m = BFMachine(self.code_index_error)
+        self.assertEqual(m.pc, 0)
+        with self.assertRaises(IndexError):
+            m.run()
 
+    def test_whitespace(self):
+        m = BFMachine(self.code_whitespace)
+        self.assertEqual(m.pc, 0)
+        m.run()
+        self.assertEqual(m.pc, 4)
+        self.assertEqual(m.memory_pointer,0)
+        self.assertEqual(m.memory,b'\x00')
+
+    def test_comment(self):
+        m = BFMachine(self.code_comment)
+        self.assertEqual(m.pc, 0)
+        m.run()
+        self.assertEqual(m.pc, 3)
+        self.assertEqual(m.memory_pointer,0)
+        self.assertEqual(m.memory,b'\x00')
 
 if __name__ == '__main__':
     unittest.main()
