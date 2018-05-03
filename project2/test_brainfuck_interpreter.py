@@ -7,13 +7,6 @@ class TestBFMachine(unittest.TestCase):
     code_quine = b'->+>+++>>+>++>+>+++>>+>++>>>+>+>+>++>+>>>>+++>+>>++>+>+++>>++>++>>+>>+>++>++>+>>>>+++>+>>>>++>++>>>>+>>++>+>+++>>>++>>++++++>>+>>++>+>>>>+++>>+++++>>+>+++>>>++>>++>>+>>++>+>+++>>>++>>+++++++++++++>>+>>++>+>+++>+>+++>>>++>>++++>>+>>++>+>>>>+++>>+++++>>>>++>>>>+>+>++>>+++>+>>>>+++>+>>>>+++>+>>>>+++>>++>++>+>+++>+>++>++>>>>>>++>+>+++>>>>>+++>>>++>+>+++>+>+>++>>>>>>++>>>+>>>++>+>>>>+++>+>>>+>>++>+>++++++++++++++++++>>>>+>+>>>+>>++>+>+++>>>++>>++++++++>>+>>++>+>>>>+++>>++++++>>>+>++>>+++>+>+>++>+>+++>>>>>+++>>>+>+>>++>+>+++>>>++>>++++++++>>+>>++>+>>>>+++>>++++>>+>+++>>>>>>++>+>+++>>+>++>>>>+>+>++>+>>>>+++>>+++>>>+[[->>+<<]<+]+++++[->+++++++++<]>.[+]>>[<<+++++++[->+++++++++<]>-.------------------->-[-<.<+>>]<[+]<+>>>]<<<[-[-[-[>>+<++++++[->+++++<]]>++++++++++++++<]>+++<]++++++[->+++++++<]>+<<<-[->>>++<<<]>[->>.<<]<<]'
     code_no_loop = b'++++++++>->-->--->----<<'
     code_loop = b'+++[-]'
-    code_index_error = b'<.'
-    code_whitespace = b'   .'  # note that I add a dot to stop interpreter from complaining
-    code_comment = b'# \n'
-    code_invalid_code = 666
-    code_unmatched_left_bracket = b'['
-    code_unmatched_right_bracket = b'-]'  # note that an extra '-' is added to force interpret to complain
-    code_input = b','
 
     def test_init(self):
         m = BFMachine()
@@ -23,8 +16,8 @@ class TestBFMachine(unittest.TestCase):
         self.assertEqual(m.memory_pointer, 0)
         self.assertEqual(m.pc, 0)
 
-        m = BFMachine(b'[+]')
-        self.assertEqual(m.code, b'[+]')
+        m = BFMachine(b'+[+]')
+        self.assertEqual(m.code, b'+[+]')
         self.assertEqual(m.cycles, 0)
         self.assertEqual(m.memory, b'\x00')
         self.assertEqual(m.memory_pointer, 0)
@@ -49,7 +42,6 @@ class TestBFMachine(unittest.TestCase):
         m = BFMachine(b'+++')  # modifies mem first
         m.run()
         m.reset_mem()
-        self.assertEqual(len(m.memory), 1)
         self.assertEqual(m.memory, b'\x00')
 
     def test_quine_test(self):
@@ -61,6 +53,7 @@ class TestBFMachine(unittest.TestCase):
 
         self.assertFalse(BFMachine.quine_test(self.code_hello))
         self.assertTrue(BFMachine.quine_test(self.code_quine))
+        self.assertTrue(BFMachine.quine_test(self.code_quine.decode()))
 
     def test_hello_world(self):
         m = BFMachine(self.code_hello)
@@ -79,10 +72,8 @@ class TestBFMachine(unittest.TestCase):
 
     def test_property_memory(self):
         m = BFMachine(self.code_no_loop)
-        self.assertEqual(len(m.memory), 1)
         self.assertEqual(m.memory, b'\x00')
         m.run()
-        self.assertEqual(len(m.memory), 5)
         self.assertEqual(m.memory, b'\x08\xff\xfe\xfd\xfc')
 
     def test_property_memory_pointer(self):
@@ -102,14 +93,51 @@ class TestBFMachine(unittest.TestCase):
         m.run()
         self.assertEqual(m.pc, len(self.code_loop))
 
-    def test_index_error(self):
-        m = BFMachine(self.code_index_error)
-        self.assertEqual(m.pc, 0)
-        with self.assertRaises(IndexError):
+    def test_init_invalid_code(self):
+        with self.assertRaises(TypeError):
+            m = BFMachine(666)
+
+    def test_run_with_invalid_input(self):
+        m = BFMachine(b',.')
+
+        with self.assertRaises(TypeError):
+            m.run(1)
+
+    def test_run_without_code(self):
+        m = BFMachine()
+        with self.assertRaises(ValueError):
             m.run()
 
+    def test_input(self):
+        m = BFMachine(b',>,')
+        self.assertEqual(m.pc, 0)
+        m.run(b'\xcc\xdd')
+        self.assertEqual(m.pc, 3)
+        self.assertEqual(m.memory_pointer, 1)
+        self.assertEqual(m.memory, b'\xcc\xdd')
+
+        m.run('he')
+        self.assertEqual(m.pc, 3)
+        self.assertEqual(m.memory_pointer, 1)
+        self.assertEqual(m.memory, b'he')
+
+    def test_halt(self):
+        m = BFMachine(b'+!+')
+        self.assertEqual(m.pc, 0)
+        m.run()
+        self.assertEqual(m.pc, 1)
+        self.assertEqual(m.memory_pointer, 0)
+        self.assertEqual(m.memory, b'\x01')
+
     def test_whitespace(self):
-        m = BFMachine(self.code_whitespace)
+        m = BFMachine(b'   ') # purely whitespace
+        self.assertEqual(m.pc, 0)
+        m.run()
+        self.assertEqual(m.pc, 3)
+        self.assertEqual(m.memory_pointer, 0)
+        self.assertEqual(m.memory, b'\x00')
+
+        m = BFMachine(b'   .')
         self.assertEqual(m.pc, 0)
         m.run()
         self.assertEqual(m.pc, 4)
@@ -117,48 +145,72 @@ class TestBFMachine(unittest.TestCase):
         self.assertEqual(m.memory, b'\x00')
 
     def test_comment(self):
-        m = BFMachine(self.code_comment)
+        m = BFMachine(b'# ') # no '\n' to terminate the comment
         self.assertEqual(m.pc, 0)
         m.run()
         self.assertEqual(m.pc, 3)
         self.assertEqual(m.memory_pointer, 0)
         self.assertEqual(m.memory, b'\x00')
 
-    def test_invalid_code(self):
-        with self.assertRaises(TypeError):
-            m = BFMachine(self.code_invalid_code)
+        m = BFMachine(b'# \n')
+        self.assertEqual(m.pc, 0)
+        m.run()
+        self.assertEqual(m.pc, 3)
+        self.assertEqual(m.memory_pointer, 0)
+        self.assertEqual(m.memory, b'\x00')
+
+    def test_invalid_opcode(self):
+        m = BFMachine(b'+@+')
+        self.assertEqual(m.pc, 0)
+
+        with self.assertRaises(SyntaxError):
+            m.run()
+
+    def test_index_error(self):
+        m = BFMachine(b'<.')
+        self.assertEqual(m.pc, 0)
+
+        with self.assertRaises(IndexError):
+            m.run()
 
     def test_unmatched_left_bracket(self):
-        m = BFMachine(self.code_unmatched_left_bracket)
+        m = BFMachine(b'[')
         self.assertEqual(m.pc, 0)
         with self.assertRaises(SyntaxError):
             m.run()
 
     def test_unmatched_right_bracket(self):
-        m = BFMachine(self.code_unmatched_right_bracket)
+        m = BFMachine(b'-]') # note that an extra '-' is added to force interpreter to complain
         self.assertEqual(m.pc, 0)
+
         with self.assertRaises(SyntaxError):
             m.run()
 
-    def test_uncompatible_cycle_limit(self):
-        m = BFMachine(b' ')
+    def test_cycle_limit(self):
+        m = BFMachine(b'+[+]')
         self.assertEqual(m.pc, 0)
+
         with self.assertRaises(TypeError):
             m.run(cycle_limit="awesome")
 
-    def test_invalid_cycle_limit(self):
-        m = BFMachine(b' ')
-        self.assertEqual(m.pc, 0)
         with self.assertRaises(ValueError):
             m.run(cycle_limit=-1)
 
-    def test_input(self):
-        m = BFMachine(b',')
+        with self.assertRaises(TimeoutError):
+            m.run(cycle_limit=100)
+
+        m.run()
+        self.assertEqual(m.pc, 4)
+        self.assertEqual(m.memory, b'\x00')
+        self.assertEqual(m.memory_pointer, 0)
+
+    def test_run_without_reset_mem(self):
+        m = BFMachine(b'+')
         self.assertEqual(m.pc, 0)
         m.run()
-        self.assertEqual(m.pc, 1)
-        self.assertEqual(m.memory_pointer, 0)
-        self.assertEqual(m.memory, b'\x00')
+        self.assertEqual(m.memory, b'\x01')
+        m.run(reset_mem=False)
+        self.assertEqual(m.memory, b'\x02')
 
 if __name__ == '__main__':
     unittest.main()
