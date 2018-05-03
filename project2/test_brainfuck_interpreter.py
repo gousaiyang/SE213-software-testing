@@ -8,11 +8,12 @@ class TestBFMachine(unittest.TestCase):
     code_no_loop = b'++++++++>->-->--->----<<'
     code_loop = b'+++[-]'
     code_index_error = b'<.'
-    code_whitespace = b'   .'   #note that I add a dot to stop interpreter from complaining
-    code_comment=b'# \n'
-    code_invalid_code=666
-    code_unmatched_left_bracket=b'['
-    code_unmatched_right_bracket=b'-]'  # note that an extra '-' is added to force interpret to complain
+    code_whitespace = b'   .'  # note that I add a dot to stop interpreter from complaining
+    code_comment = b'# \n'
+    code_invalid_code = 666
+    code_unmatched_left_bracket = b'['
+    code_unmatched_right_bracket = b'-]'  # note that an extra '-' is added to force interpret to complain
+    code_input = b','
 
     def test_init(self):
         m = BFMachine()
@@ -112,20 +113,20 @@ class TestBFMachine(unittest.TestCase):
         self.assertEqual(m.pc, 0)
         m.run()
         self.assertEqual(m.pc, 4)
-        self.assertEqual(m.memory_pointer,0)
-        self.assertEqual(m.memory,b'\x00')
+        self.assertEqual(m.memory_pointer, 0)
+        self.assertEqual(m.memory, b'\x00')
 
     def test_comment(self):
         m = BFMachine(self.code_comment)
         self.assertEqual(m.pc, 0)
         m.run()
         self.assertEqual(m.pc, 3)
-        self.assertEqual(m.memory_pointer,0)
-        self.assertEqual(m.memory,b'\x00')
+        self.assertEqual(m.memory_pointer, 0)
+        self.assertEqual(m.memory, b'\x00')
 
     def test_invalid_code(self):
         with self.assertRaises(TypeError):
-            m=BFMachine(self.code_invalid_code)
+            m = BFMachine(self.code_invalid_code)
 
     def test_unmatched_left_bracket(self):
         m = BFMachine(self.code_unmatched_left_bracket)
@@ -139,7 +140,25 @@ class TestBFMachine(unittest.TestCase):
         with self.assertRaises(SyntaxError):
             m.run()
 
+    def test_uncompatible_cycle_limit(self):
+        m = BFMachine(b' ')
+        self.assertEqual(m.pc, 0)
+        with self.assertRaises(TypeError):
+            m.run(cycle_limit="awesome")
 
+    def test_invalid_cycle_limit(self):
+        m = BFMachine(b' ')
+        self.assertEqual(m.pc, 0)
+        with self.assertRaises(ValueError):
+            m.run(cycle_limit=-1)
+
+    def test_input(self):
+        m = BFMachine(b',')
+        self.assertEqual(m.pc, 0)
+        m.run()
+        self.assertEqual(m.pc, 1)
+        self.assertEqual(m.memory_pointer, 0)
+        self.assertEqual(m.memory, b'\x00')
 
 if __name__ == '__main__':
     unittest.main()
