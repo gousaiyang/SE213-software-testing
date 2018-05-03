@@ -10,6 +10,9 @@ class TestBFMachine(unittest.TestCase):
     code_index_error = b'<.'
     code_whitespace = b'   .'   #note that I add a dot to stop interpreter from complaining
     code_comment=b'# \n'
+    code_invalid_code=666
+    code_unmatched_left_bracket=b'['
+    code_unmatched_right_bracket=b'-]'  # note that an extra '-' is added to force interpret to complain
 
     def test_init(self):
         m = BFMachine()
@@ -119,6 +122,24 @@ class TestBFMachine(unittest.TestCase):
         self.assertEqual(m.pc, 3)
         self.assertEqual(m.memory_pointer,0)
         self.assertEqual(m.memory,b'\x00')
+
+    def test_invalid_code(self):
+        with self.assertRaises(TypeError):
+            m=BFMachine(self.code_invalid_code)
+
+    def test_unmatched_left_bracket(self):
+        m = BFMachine(self.code_unmatched_left_bracket)
+        self.assertEqual(m.pc, 0)
+        with self.assertRaises(SyntaxError):
+            m.run()
+
+    def test_unmatched_right_bracket(self):
+        m = BFMachine(self.code_unmatched_right_bracket)
+        self.assertEqual(m.pc, 0)
+        with self.assertRaises(SyntaxError):
+            m.run()
+
+
 
 if __name__ == '__main__':
     unittest.main()
