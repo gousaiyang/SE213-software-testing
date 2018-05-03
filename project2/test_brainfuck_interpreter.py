@@ -130,13 +130,6 @@ class TestBFMachine(unittest.TestCase):
         self.assertEqual(m.memory, b'\x01')
 
     def test_whitespace(self):
-        m = BFMachine(b'   ') # purely whitespace
-        self.assertEqual(m.pc, 0)
-        m.run()
-        self.assertEqual(m.pc, 3)
-        self.assertEqual(m.memory_pointer, 0)
-        self.assertEqual(m.memory, b'\x00')
-
         m = BFMachine(b'   .')
         self.assertEqual(m.pc, 0)
         m.run()
@@ -144,15 +137,22 @@ class TestBFMachine(unittest.TestCase):
         self.assertEqual(m.memory_pointer, 0)
         self.assertEqual(m.memory, b'\x00')
 
-    def test_comment(self):
-        m = BFMachine(b'# ') # no '\n' to terminate the comment
+        m = BFMachine(b'   ') # purely whitespace
         self.assertEqual(m.pc, 0)
         m.run()
         self.assertEqual(m.pc, 3)
         self.assertEqual(m.memory_pointer, 0)
         self.assertEqual(m.memory, b'\x00')
 
+    def test_comment(self):
         m = BFMachine(b'# \n')
+        self.assertEqual(m.pc, 0)
+        m.run()
+        self.assertEqual(m.pc, 3)
+        self.assertEqual(m.memory_pointer, 0)
+        self.assertEqual(m.memory, b'\x00')
+
+        m = BFMachine(b'# ') # no '\n' to terminate the comment
         self.assertEqual(m.pc, 0)
         m.run()
         self.assertEqual(m.pc, 3)
