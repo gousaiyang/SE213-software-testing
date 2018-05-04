@@ -145,14 +145,14 @@ class TestBFMachine(unittest.TestCase):
         self.assertEqual(m.memory, b'\x00')
 
     def test_comment(self):
-        m = BFMachine(b'# \n')
+        m = BFMachine(b'#+\n')
         self.assertEqual(m.pc, 0)
         m.run()
         self.assertEqual(m.pc, 3)
         self.assertEqual(m.memory_pointer, 0)
         self.assertEqual(m.memory, b'\x00')
 
-        m = BFMachine(b'# ') # no '\n' to terminate the comment
+        m = BFMachine(b'#+') # no '\n' to terminate the comment
         self.assertEqual(m.pc, 0)
         m.run()
         self.assertEqual(m.pc, 3)
