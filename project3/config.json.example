@@ -1,0 +1,5 @@
+{
+    "webdriver_wait_time": 30,
+    "webdriver_path": "/path/to/your/chrome_driver",
+    "target_url": "http://example.com"
+}
