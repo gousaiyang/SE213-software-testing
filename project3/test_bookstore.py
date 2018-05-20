@@ -37,27 +37,30 @@ class TestBookStore(unittest.TestCase):
         self.driver.get(target_url)
         time.sleep(2)
 
+    def login(self):
+        # trigger login
+        self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a').click()
+        # fill-in form, submit
+        self.driver.find_element_by_xpath('//*[@id="loginUsername"]').send_keys(self.usr_uname)
+        self.driver.find_element_by_xpath('//*[@id="loginPassword"]').send_keys(self.usr_pwd)
+        self.driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
+        self.wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="myNavbarNickname"]')))  # till username is displayed
+
+    def logout(self, from_home=True):
+        self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a').click()
+        if from_home:
+            self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[6]/a').click()
+        else:
+            self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[8]/a').click()
+            
     def test_user_login(self):
         '''Test xxx feature of the book store.'''
-        # trigger login
-        login_btn = self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a')
-        login_btn.click()
-        # fill-in form, submit
-        form_uname = self.driver.find_element_by_xpath('//*[@id="loginUsername"]')
-        EC.visibility_of(form_uname)
-        form_uname.send_keys(self.usr_uname)
-        form_pwd = self.driver.find_element_by_xpath('//*[@id="loginPassword"]')
-        form_pwd.send_keys(self.usr_pwd)
-        submit_btn = self.driver.find_element_by_xpath('//*[@id="btnLogin"]')
-        submit_btn.click()
+        # login
+        self.login()
         # check username display
-        dsp_uname = self.driver.find_element_by_xpath('//*[@id="myNavbarNickname"]')
-        self.assertEqual(dsp_uname.text, "测试用户")
+        self.assertEqual(self.driver.find_element_by_xpath('//*[@id="myNavbarNickname"]').text, "测试用户")
         # logout
-        btn = self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a')
-        btn.click()
-        logout_btn = self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[6]/a')
-        logout_btn.click()
+        self.logout()
 
     def test_search_book(self):
         # choose a catagory
@@ -71,13 +74,7 @@ class TestBookStore(unittest.TestCase):
         self.assertEqual(result.text, 'Java编程思想')
         
     def test_purchase(self):
-        # trigger login
-        self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a').click()
-        # fill-in form, submit
-        self.driver.find_element_by_xpath('//*[@id="loginUsername"]').send_keys(self.usr_uname)
-        self.driver.find_element_by_xpath('//*[@id="loginPassword"]').send_keys(self.usr_pwd)
-        self.driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
-        self.wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="myNavbarNickname"]')))  # till username is displayed
+        self.login()
         # check cart before adding
         title = self.driver.find_element_by_xpath('//*[@id="book-1"]/div/div/h4').text
         self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[1]/a').click()
@@ -107,12 +104,8 @@ class TestBookStore(unittest.TestCase):
         self.assertEqual(self.wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="payStatus"]/div'))).text, '支付成功！')
         self.wait.until(EC.invisibility_of_element_located((By.XPATH, '//*[@id="payDialog"]/div/div')))
         # logout
-        self.wait.until(EC.url_changes)
-        btn = self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a')
-        btn.click()
-        logout_btn = self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[6]/a')
-        logout_btn.click()
-
+        time.sleep(2)
+        self.logout(from_home=False)
 
     @classmethod
     def tearDownClass(cls):
