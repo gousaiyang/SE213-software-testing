@@ -3,6 +3,7 @@
 import json
 import time
 import unittest
+import os
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -22,7 +23,7 @@ class TestBookStore(unittest.TestCase):
     usr_pwd = '000000'
     admin_uname = 'admin'
     admin_pwd = 'NF3z075ZCqmAiQCP'
-    
+
     @classmethod
     def setUpClass(cls):
         '''Initialize the web driver only once.
@@ -37,22 +38,32 @@ class TestBookStore(unittest.TestCase):
         self.driver.get(target_url)
         time.sleep(2)
 
-    def login(self):
+    def login(self, admin=False):
         # trigger login
         self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a').click()
         # fill-in form, submit
-        self.driver.find_element_by_xpath('//*[@id="loginUsername"]').send_keys(self.usr_uname)
-        self.driver.find_element_by_xpath('//*[@id="loginPassword"]').send_keys(self.usr_pwd)
+        if admin:
+            self.driver.find_element_by_xpath('//*[@id="loginUsername"]').send_keys(self.admin_uname)
+            self.driver.find_element_by_xpath('//*[@id="loginPassword"]').send_keys(self.admin_pwd)
+        else:
+            self.driver.find_element_by_xpath('//*[@id="loginUsername"]').send_keys(self.usr_uname)
+            self.driver.find_element_by_xpath('//*[@id="loginPassword"]').send_keys(self.usr_pwd)
+
         self.driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
         self.wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="myNavbarNickname"]')))  # till username is displayed
 
-    def logout(self, from_home=True):
-        self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a').click()
-        if from_home:
-            self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[6]/a').click()
+    def logout(self, from_home=True, admin=False):
+        if admin:
+            self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul[2]/li/a').click()
+            self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul[2]/li/ul/li[5]/a').click()
         else:
-            self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[8]/a').click()
-            
+            self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a').click()
+
+            if from_home:
+                self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[6]/a').click()
+            else:
+                self.driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[8]/a').click()
+
     def test_user_login(self):
         '''Test xxx feature of the book store.'''
         # login
@@ -72,7 +83,7 @@ class TestBookStore(unittest.TestCase):
         # check result
         result = self.driver.find_element_by_xpath('//*[@id="book-4"]/div/div/h4')
         self.assertEqual(result.text, 'Java编程思想')
-        
+
     def test_purchase(self):
         self.login()
         # check cart before adding
@@ -107,11 +118,74 @@ class TestBookStore(unittest.TestCase):
         time.sleep(2)
         self.logout(from_home=False)
 
+
+    def test_modify_self_info(self):
+        driver = self.driver
+
+        self.login()
+
+        driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/a').click()
+        self.wait.until(EC.visibility_of_element_located((By.XPATH, '/html/body/nav[1]/div/div[2]/ul/li[2]/ul')))
+        driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul/li[2]/ul/li[3]/a').click()
+
+        # wait until the form is loaded
+        self.wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="myProfileDialog"]/div')))
+
+        update_avatar_btn = driver.find_element_by_xpath('/html/body/div[5]/input')
+        update_avatar_btn.send_keys(os.getcwd() + "/avatar.png")
+
+        time.sleep(5)
+        tips = driver.find_element_by_xpath('//*[@id="myProfileUploadTips"]')
+        self.assertIn("上传成功", tips.text)
+
+        cancel_btn = driver.find_element_by_xpath('//*[@id="myProfileDialog"]/div/div/div[3]/button[2]')
+        cancel_btn.click()
+
+        self.logout()
+
+    def test_admin_login(self):
+        driver = self.driver
+
+        self.login(admin=True)
+
+        title = driver.find_element_by_xpath('/html/body/nav[1]/div/div[1]/a')
+        self.assertEqual(title.text, "网上书店管理系统")
+
+        self.logout(admin=True)
+
+
+    def test_admin_stats(self):
+        driver = self.driver
+
+        self.login(admin=True)
+
+        driver.find_element_by_xpath('/html/body/nav[1]/div/div[2]/ul[1]/li[5]/a').click()
+        time.sleep(4)
+
+        title = driver.find_element_by_xpath('/html/body/div[1]/h1')
+        self.assertEqual(title.text, "销售统计")
+
+        select = Select(driver.find_element_by_xpath('//*[@id="filterCategory"]'))
+        select.select_by_index(1)
+        driver.find_element_by_xpath('//*[@id="btnFilterCategory"]').click()
+        self.wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="filterCategoryResult"]')))
+
+        person = driver.find_element_by_xpath('//*[@id="filterCategoryPerson"]')
+        quantity = driver.find_element_by_xpath('//*[@id="filterCategoryQuantity"]')
+        price = driver.find_element_by_xpath('//*[@id="filterCategoryPrice"]')
+        self.assertIn("购买人数", person.text)
+        self.assertIn("总销量", quantity.text)
+        self.assertIn("总金额", price.text)
+
+        self.logout(admin=True)
+
+
     @classmethod
     def tearDownClass(cls):
         '''Stop the web driver only once.
         Doing this repeatedly in `tearDown()` could be time-consuming.'''
         cls.driver.quit()
+
 
 
 if __name__ == '__main__':
