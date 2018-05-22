@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import functools
+import io
 import json
+import os
+import sys
 import time
 import unittest
-import os
 
+import colorlabels as cl
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -12,12 +16,41 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
+assert sys.version_info[0] >= 3
 
 # Load all config variables into the global namespace.
 with open('config.json', 'r') as f:
     globals().update(json.load(f))
 
 
+def pretty_msg_test_func(func):
+    '''Function decorator to make a test function emit pretty messages.'''
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        p = cl.progress("Running test case '%s'..." % func.__name__, cl.PROGRESS_SPIN, erase=True)
+
+        try:
+            func(*args, **kwargs)
+        except Exception:
+            p.stop()
+            cl.error("Test case '%s' failed." % func.__name__)
+            raise
+        else:
+            p.stop()
+            cl.success("Test case '%s' passed." % func.__name__)
+
+    return wrapper
+
+
+def pretty_msg_test_class(cls):
+    '''Class decorator to make all test functions in a test class emit pretty messages.'''
+    for func in filter(callable, (getattr(cls, n) for n in dir(cls) if n.startswith('test_'))):
+        setattr(cls, func.__name__, pretty_msg_test_func(func))
+
+    return cls
+
+
+@pretty_msg_test_class
 class TestBookStore(unittest.TestCase):
     usr_uname = 'testuser'
     usr_pwd = '000000'
@@ -28,7 +61,7 @@ class TestBookStore(unittest.TestCase):
     def setUpClass(cls):
         '''Initialize the web driver only once.
         Doing this repeatedly in `setUp()` could be time-consuming.'''
-        cls.driver = webdriver.Chrome(webdriver_path)
+        cls.driver = webdriver.Chrome(webdriver_path, service_log_path=os.devnull)
         cls.driver.maximize_window()
         cls.driver.implicitly_wait(webdriver_wait_time)
         cls.wait = WebDriverWait(cls.driver, webdriver_wait_time)
@@ -92,8 +125,8 @@ class TestBookStore(unittest.TestCase):
         time.sleep(2)  # wait for ajax
         for i, _ in enumerate(self.driver.find_elements_by_xpath('/html/body/div[1]/div/table/tbody/tr')):
             # if present, delete it
-            if self.driver.find_element_by_xpath('/html/body/div[1]/div/table/tbody/tr[{}]/td[1]'.format(i+1)).text == title:
-                self.driver.find_element_by_xpath('/html/body/div[1]/div/table/tbody/tr[{}]/td[5]/button[2]'.format(i+1)).click()
+            if self.driver.find_element_by_xpath('/html/body/div[1]/div/table/tbody/tr[{}]/td[1]'.format(i + 1)).text == title:
+                self.driver.find_element_by_xpath('/html/body/div[1]/div/table/tbody/tr[{}]/td[5]/button[2]'.format(i + 1)).click()
                 self.wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="btnDeleteItem"]'))).click()
                 self.wait.until(EC.invisibility_of_element_located((By.XPATH, '//*[@id="btnDeleteItem"]')))
         self.driver.back()
@@ -106,7 +139,7 @@ class TestBookStore(unittest.TestCase):
         time.sleep(2)  # wait for ajax
         added = False
         for i, _ in enumerate(self.driver.find_elements_by_xpath('/html/body/div[1]/div/table/tbody/tr')):
-            if self.driver.find_element_by_xpath('/html/body/div[1]/div/table/tbody/tr[{}]/td[1]'.format(i+1)).text == title:
+            if self.driver.find_element_by_xpath('/html/body/div[1]/div/table/tbody/tr[{}]/td[1]'.format(i + 1)).text == title:
                 added = True
         self.assertTrue(added)
         # checkout
@@ -117,7 +150,6 @@ class TestBookStore(unittest.TestCase):
         # logout
         time.sleep(2)
         self.logout(from_home=False)
-
 
     def test_modify_self_info(self):
         driver = self.driver
@@ -153,7 +185,6 @@ class TestBookStore(unittest.TestCase):
 
         self.logout(admin=True)
 
-
     def test_admin_stats(self):
         driver = self.driver
 
@@ -179,7 +210,6 @@ class TestBookStore(unittest.TestCase):
 
         self.logout(admin=True)
 
-
     @classmethod
     def tearDownClass(cls):
         '''Stop the web driver only once.
@@ -187,6 +217,9 @@ class TestBookStore(unittest.TestCase):
         cls.driver.quit()
 
 
-
 if __name__ == '__main__':
-    unittest.main()
+    testsuite = unittest.TestLoader().loadTestsFromTestCase(TestBookStore)
+    with io.StringIO() as f:
+        unittest.TextTestRunner(stream=f).run(testsuite)
+        cl.info('Message from unittest:')
+        print(f.getvalue())
