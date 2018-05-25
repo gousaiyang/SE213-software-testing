@@ -1,5 +1,9 @@
 {
     "webdriver_wait_time": 30,
     "webdriver_path": "/path/to/your/chrome_driver",
-    "target_url": "http://example.com"
+    "target_url": "http://example.com",
+    "customer_uname": "CUSTOMER_USERNAME",
+    "customer_pwd": "CUSTOMER_PASSWORD",
+    "admin_uname": "ADMIN_USERNAME",
+    "admin_pwd": "ADMIN_PASSWORD"
 }
