@@ -155,7 +155,7 @@ class TestBFMachine(unittest.TestCase):
         m = BFMachine(b'#+') # no '\n' to terminate the comment
         self.assertEqual(m.pc, 0)
         m.run()
-        self.assertEqual(m.pc, 3)
+        self.assertEqual(m.pc, 2)
         self.assertEqual(m.memory_pointer, 0)
         self.assertEqual(m.memory, b'\x00')
 
@@ -212,5 +212,5 @@ class TestBFMachine(unittest.TestCase):
         m.run(reset_mem=False)
         self.assertEqual(m.memory, b'\x02')
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no branch
     unittest.main()

@@ -100,20 +100,17 @@ class BFMachine:
             self._pc += 1
 
     def _skip_whitespaces(self):
-        opcode = b' '
-
-        while self._pc < self._code_len and opcode in string.whitespace.encode():
+        while self._pc < self._code_len:
+            if bytes([self._code[self._pc]]) not in string.whitespace.encode():
+                break
             self._pc += 1
-            opcode = bytes([self._code[self._pc]])
 
     def _skip_comment(self):
-        opcode = b''
-
-        while self._pc < self._code_len and opcode != b'\n': # single line comment
+        while self._pc < self._code_len: # single line comment
+            if bytes([self._code[self._pc]]) == b'\n':
+                self._pc += 1
+                break
             self._pc += 1
-            opcode = bytes([self._code[self._pc]])
-
-        self._pc += 1
 
     def run(self, input_=b'', *, reset_mem=True, cycle_limit=None):
         if not isinstance(input_, (str, bytes)):
